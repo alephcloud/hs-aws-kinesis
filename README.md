@@ -1,12 +1,12 @@
 [![Build Status](https://travis-ci.org/alephcloud/hs-aws-general.svg?branch=master)](https://travis-ci.org/alephcloud/hs-aws-kinesis)
 
 
-Haskell Bindings for Amazon AWS Kinesis
-=======================================
+Haskell Bindings for [Amazon Kinesis](http://aws.amazon.com/kinesis/)
+=====================================================================
 
 *API Version 2013-12-02*
 
-[Amazon AWS Kinesis API Reference](http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference)
+[Amazon Kinesis API Reference](http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference)
 
 This package depends on the [aws-general](https://github.com/alephcloud/hs-aws-general) package
 and the [aws](https://github.com/aristidb/aws) package. From the latter the it borrows the

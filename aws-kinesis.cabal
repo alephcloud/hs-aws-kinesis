@@ -4,9 +4,12 @@
 
 Name: aws-kinesis
 Version: 0.1.1
-Synopsis: Bindings for AWS Kinesis Version 2013-12-02
+Synopsis: Bindings for Amazon Kinesis
 description:
-    Bindings for AWS Kinesis
+    Bindings for <http://aws.amazon.com/kinesis/ Amazon Kinesis>
+    .
+    Amazon Kinesis is an AWS service for real-time processing of
+    streaming data at massive scale.
     .
     /API Version: 2013-12-02/
     .
