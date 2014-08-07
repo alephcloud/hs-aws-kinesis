@@ -53,6 +53,7 @@ import Aws.Kinesis.Types
 
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LB
+import Data.Maybe
 import Data.Typeable
 
 describeStreamAction :: KinesisAction
@@ -105,6 +106,35 @@ instance Transaction DescribeStream DescribeStreamResponse
 instance AsMemoryResponse DescribeStreamResponse where
     type MemoryResponse DescribeStreamResponse = DescribeStreamResponse
     loadToMemory = return
+
+instance ListResponse DescribeStreamResponse Shard where
+    listResponse DescribeStreamResponse{..} =
+        streamDescriptionShards describeStreamResStreamDescription
+
+-- | This instance assumes that the returned 'StreamDescription' contains at least one
+-- shard if available, i.e. if @streamDescriptionResHasMoreShards == True@.
+--
+-- Otherwise, in case no shard is returned but
+-- @streamDescriptionHasMoreShards == True@ the implementation in this instance
+-- returns Nothing, thus ignoring the value of 'streamDescriptionHasMoreShards'.
+-- The alternatives would be to either throw an exception or to start over
+-- with a reqeust for the first set of shards which could result in a
+-- non-terminating behavior.
+--
+-- The request parameter 'describeStreamLimit' is interpreted as limit for each
+-- single request and not for the overall transaction.
+--
+instance IteratedTransaction DescribeStream DescribeStreamResponse where
+    nextIteratedRequest req@DescribeStream{..} res
+        | streamDescriptionHasMoreShards streamDesc && isJust exclStartShardId = Just req
+            { describeStreamExclusiveStartShardId = exclStartShardId
+            }
+        | otherwise = Nothing
+      where
+        streamDesc = describeStreamResStreamDescription res
+        exclStartShardId = case streamDescriptionShards streamDesc of
+            [] -> Nothing
+            t -> Just . shardShardId . last $ t
 
 -- -------------------------------------------------------------------------- --
 -- Exceptions

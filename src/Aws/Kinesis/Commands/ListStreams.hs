@@ -50,6 +50,7 @@ import Control.Applicative
 
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LB
+import Data.Maybe
 import Data.Typeable
 
 listStreamsAction :: KinesisAction
@@ -101,6 +102,33 @@ instance Transaction ListStreams ListStreamsResponse
 instance AsMemoryResponse ListStreamsResponse where
     type MemoryResponse ListStreamsResponse = ListStreamsResponse
     loadToMemory = return
+
+instance ListResponse ListStreamsResponse StreamName where
+    listResponse (ListStreamsResponse _ streams) = streams
+
+-- | This instance assumes that 'ListStreams' returns at least one
+-- stream if available, i.e. if @listStreamsResHasMoreStreams == True@.
+--
+-- Otherwise, in case no stream is returned but
+-- @listStreamsResHasMoreStreams == True@ the implementation in this instance
+-- returns Nothing, thus ignoring the value of 'listStreamsResHasMoreStreams'.
+-- The alternatives would be to either throw an exception or to start over
+-- with a reqeust for the first set of streams which could result in a
+-- non-terminating behavior.
+--
+-- The request parameter 'listStreamsLimit' is interpreted as limit for each
+-- single request and not for the overall transaction.
+--
+instance IteratedTransaction ListStreams ListStreamsResponse where
+    nextIteratedRequest req@ListStreams{..} ListStreamsResponse{..}
+        | listStreamsResHasMoreStreams && isJust exclStartStream = Just req
+            { listStreamsExclusiveStartStreamName = exclStartStream
+            }
+        | otherwise = Nothing
+      where
+        exclStartStream = case listStreamsResStreamNames of
+            [] -> Nothing
+            t -> Just $ last t
 
 -- -------------------------------------------------------------------------- --
 -- Exceptions

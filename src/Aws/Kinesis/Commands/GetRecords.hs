@@ -119,6 +119,16 @@ instance AsMemoryResponse GetRecordsResponse where
     type MemoryResponse GetRecordsResponse = GetRecordsResponse
     loadToMemory = return
 
+instance ListResponse GetRecordsResponse Record where
+    listResponse (GetRecordsResponse _ records) = records
+
+-- | The request parameter 'getRecordsLimit' is interpreted as limit for each
+-- single request and not for the overall transaction.
+--
+instance IteratedTransaction GetRecords GetRecordsResponse where
+    nextIteratedRequest GetRecords{..} GetRecordsResponse{..} =
+        GetRecords getRecordsLimit <$> getRecordsResNextShardIterator
+
 -- -------------------------------------------------------------------------- --
 -- Exceptions
 --
