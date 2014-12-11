@@ -54,6 +54,7 @@ Library
         Aws.Kinesis.Commands.CreateStream
         Aws.Kinesis.Commands.DeleteStream
         Aws.Kinesis.Commands.PutRecord
+        Aws.Kinesis.Commands.PutRecords
         Aws.Kinesis.Commands.GetRecords
         Aws.Kinesis.Commands.GetShardIterator
         Aws.Kinesis.Commands.ListStreams
