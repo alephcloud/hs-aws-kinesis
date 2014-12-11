@@ -71,7 +71,7 @@
 --
 module Aws.Kinesis.Commands.PutRecords
 ( PutRecords(..)
-, PutRecordsItem(..)
+, PutRecordsRequestEntry(..)
 , PutRecordsResponse(..)
 , PutRecordsResponseRecord(..)
 ) where
@@ -79,7 +79,6 @@ module Aws.Kinesis.Commands.PutRecords
 import Aws.Core
 import Aws.Kinesis.Core
 import Aws.Kinesis.Types
-import Control.Applicative
 import Data.Aeson
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
@@ -87,59 +86,56 @@ import qualified Data.ByteString.Base64 as B64
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 
-data PutRecordsItem = PutRecordsItem
-    { putRecordsItemData :: !BS.ByteString
-    , putRecordsItemExplicitHashKey :: !(Maybe PartitionHash)
-    , putRecordsItemPartitionKey :: !PartitionKey
+data PutRecordsRequestEntry = PutRecordsRequestEntry
+    { putRecordsRequestEntryData :: !BS.ByteString
+    , putRecordsRequestEntryExplicitHashKey :: !(Maybe PartitionHash)
+    , putRecordsRequestEntryPartitionKey :: !PartitionKey
     } deriving Show
 
 data PutRecords = PutRecords
-    { putRecordsRecords :: ![PutRecordsItem]
-    , putRecordsStreamName :: StreamName
-    , putRecordsSequenceNumberForOrdering :: !(Maybe SequenceNumber)
+    { putRecordsRecords :: ![PutRecordsRequestEntry]
+    , putRecordsStreamName :: !StreamName
     } deriving Show
 
-data PutRecordsResponseRecord
-    = PutRecordsResponseRecord SequenceNumber ShardId
-    | PutRecordsResponseRecordFailed T.Text
-    deriving Show
+data PutRecordsResponseRecord = PutRecordsResponseRecord
+    { putRecordsResponseRecordErrorCode :: !(Maybe T.Text)
+    , putRecordsResponseRecordErrorMessage :: !(Maybe T.Text)
+    , putRecordsResponseRecordSequenceNumber :: !(Maybe SequenceNumber)
+    , putRecordsResponseRecordShardId :: !(Maybe ShardId)
+    } deriving Show
 
 data PutRecordsResponse
     = PutRecordsResponse
-    { putRecordsResponseRecords :: ![PutRecordsResponseRecord]
+    { putRecordsResponseFailedRecordCount :: !Int
+    , putRecordsResponseRecords :: ![PutRecordsResponseRecord]
     } deriving Show
 
-instance ToJSON PutRecordsItem where
-    toJSON PutRecordsItem{..} = object $
-        [ "Data" .= T.decodeUtf8 (B64.encode putRecordsItemData)
-        , "ExplicitHashKey" .= putRecordsItemExplicitHashKey
-        , "PartitionKey" .= putRecordsItemPartitionKey
+instance ToJSON PutRecordsRequestEntry where
+    toJSON PutRecordsRequestEntry{..} = object $
+        [ "Data" .= T.decodeUtf8 (B64.encode putRecordsRequestEntryData)
+        , "ExplicitHashKey" .= putRecordsRequestEntryExplicitHashKey
+        , "PartitionKey" .= putRecordsRequestEntryPartitionKey
         ]
 
 instance ToJSON PutRecords where
     toJSON PutRecords{..} = object
         [ "Records" .= putRecordsRecords
         , "StreamName" .= putRecordsStreamName
-        , "SequenceNumberForOrdering" .= putRecordsSequenceNumberForOrdering
         ]
 
 instance FromJSON PutRecordsResponseRecord where
-    parseJSON (Object xs) = parseSuccess <|> parseFailure
-        where
-            parseSuccess =
-                PutRecordsResponseRecord
-                    <$> xs .: "SequenceNumber"
-                    <*> xs .: "ShardId"
-            parseFailure =
-                PutRecordsResponseRecordFailed
-                    <$> xs .: "Message"
-    parseJSON _ = fail "PutRecordsResponseRecord expected object"
+    parseJSON = withObject "PutRecordsResponseRecord" $ \o -> do
+        putRecordsResponseRecordErrorCode <- o .:? "ErrorCode"
+        putRecordsResponseRecordErrorMessage <- o .:? "ErrorMessage"
+        putRecordsResponseRecordSequenceNumber <- o .:? "SequenceNumber"
+        putRecordsResponseRecordShardId <- o .:? "ShardId"
+        return PutRecordsResponseRecord{..}
 
 instance FromJSON PutRecordsResponse where
-    parseJSON (Object xs) = do
-        putRecordsResponseRecords <- xs .: "Records"
+    parseJSON = withObject "PutRecordsResponse" $ \o -> do
+        putRecordsResponseFailedRecordCount <- o .: "FailedRecordCount"
+        putRecordsResponseRecords <- o .: "Records"
         return PutRecordsResponse{..}
-    parseJSON _ = fail "PutRecordsResponse expected object"
 
 instance Transaction PutRecords PutRecordsResponse where
 
