@@ -86,28 +86,58 @@ import qualified Data.ByteString.Base64 as B64
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 
+-- | Represents a single record in a 'PutRecords' request.
+--
 data PutRecordsRequestEntry = PutRecordsRequestEntry
     { putRecordsRequestEntryData :: !BS.ByteString
+    -- ^ The data blob to be put into the record. The maximum size of the data
+    -- blob is 50 kilobytes.
+
     , putRecordsRequestEntryExplicitHashKey :: !(Maybe PartitionHash)
+    -- ^ The hash value used to determine explicitly the shard that the data
+    -- record is assigned to by overriding the partition key hash.
+
     , putRecordsRequestEntryPartitionKey :: !PartitionKey
+    -- ^ Determines which shard in the stream the data record is assigned to.
+    -- All data records with the same partition key map to the same shard.
     } deriving Show
 
+-- | The body of the 'PutRecords' request.
+--
 data PutRecords = PutRecords
     { putRecordsRecords :: ![PutRecordsRequestEntry]
+    -- ^ The records associated with the request. Minimum of 1 item, maximum
+    -- 500.
+
     , putRecordsStreamName :: !StreamName
+    -- ^ The stream name associated with the request.
     } deriving Show
 
+-- | Represents the result for a single record in a 'PutRecordsResponse'.
+--
 data PutRecordsResponseRecord = PutRecordsResponseRecord
     { putRecordsResponseRecordErrorCode :: !(Maybe T.Text)
+    -- ^ If the request did not succeed, an error code will be provided.
+
     , putRecordsResponseRecordErrorMessage :: !(Maybe T.Text)
+    -- ^ If the request did not succeed, an error message will be provided.
+
     , putRecordsResponseRecordSequenceNumber :: !(Maybe SequenceNumber)
+    -- ^ The sequence number assigned to the (sucessfully processed) record.
+
     , putRecordsResponseRecordShardId :: !(Maybe ShardId)
+    -- ^ The shard ID assigned to the (successfully processed) record.
     } deriving Show
 
 data PutRecordsResponse
     = PutRecordsResponse
     { putRecordsResponseFailedRecordCount :: !Int
+    -- ^ The number of unsuccessfully processed records in a 'PutRecords'
+    -- request.
+
     , putRecordsResponseRecords :: ![PutRecordsResponseRecord]
+    -- ^ An array of successfully and unsuccessfully processed records,
+    -- correlated with the request by natural ordering.
     } deriving Show
 
 instance ToJSON PutRecordsRequestEntry where
