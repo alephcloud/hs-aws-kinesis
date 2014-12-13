@@ -1,9 +1,9 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DeriveDataTypeable    #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE TypeFamilies          #-}
 
 -- |
 -- Module: Aws.Kinesis.Commands.GetShardIterator
@@ -64,24 +64,24 @@ module Aws.Kinesis.Commands.GetShardIterator
 , GetShardIteratorExceptions(..)
 ) where
 
-import Aws.Core
-import Aws.Kinesis.Types
-import Aws.Kinesis.Core
+import           Aws.Core
+import           Aws.Kinesis.Core
+import           Aws.Kinesis.Types
 
-import Control.Applicative
+import           Control.Applicative
 
-import Data.Aeson
+import           Data.Aeson
 import qualified Data.ByteString.Lazy as LB
-import Data.Typeable
+import           Data.Typeable
 
 getShardIteratorAction :: KinesisAction
 getShardIteratorAction = KinesisGetShardIterator
 
 data GetShardIterator = GetShardIterator
-    { getShardIteratorShardId :: !ShardId
+    { getShardIteratorShardId                :: !ShardId
     -- ^ The shard ID of the shard to get the iterator for.
 
-    , getShardIteratorShardIteratorType :: !ShardIteratorType
+    , getShardIteratorShardIteratorType      :: !ShardIteratorType
     -- ^ Determines how the shard iterator is used to start reading data
     -- records from the shard.
 
@@ -89,7 +89,7 @@ data GetShardIterator = GetShardIterator
     -- ^ The sequence number of the data record in the shard from which to
     -- start reading from.
 
-    , getShardIteratorStreamName :: !StreamName
+    , getShardIteratorStreamName             :: !StreamName
     -- ^ The name of the stream.
     }
     deriving (Show, Read, Eq, Ord, Typeable)
@@ -98,7 +98,7 @@ instance ToJSON GetShardIterator where
     toJSON GetShardIterator{..} = object
         [ "ShardId" .= getShardIteratorShardId
         , "ShardIteratorType" .= getShardIteratorShardIteratorType
-        , "SequenceNumber" .= getShardIteratorStartingSequenceNumber
+        , "StartingSequenceNumber" .= getShardIteratorStartingSequenceNumber
         , "StreamName" .= getShardIteratorStreamName
         ]
 
