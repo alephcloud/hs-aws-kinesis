@@ -327,7 +327,7 @@ instance Exception KinesisErrorResponse
 instance FromJSON KinesisErrorResponse where
     parseJSON = withObject "KinesisErrorResponse" $ \o -> KinesisErrorResponse
         <$> o .: "__type"
-        <*> o .: "message"
+        <*> o .:? "message" .!= ""
 
 -- | Common Kinesis Errors
 --

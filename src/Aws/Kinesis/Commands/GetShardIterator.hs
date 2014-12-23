@@ -98,7 +98,7 @@ instance ToJSON GetShardIterator where
     toJSON GetShardIterator{..} = object
         [ "ShardId" .= getShardIteratorShardId
         , "ShardIteratorType" .= getShardIteratorShardIteratorType
-        , "SequenceNumber" .= getShardIteratorStartingSequenceNumber
+        , "StartingSequenceNumber" .= getShardIteratorStartingSequenceNumber
         , "StreamName" .= getShardIteratorStreamName
         ]
 
