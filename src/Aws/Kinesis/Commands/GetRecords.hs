@@ -125,7 +125,12 @@ instance ListResponse GetRecordsResponse Record where
 -- | The request parameter 'getRecordsLimit' is interpreted as limit for each
 -- single request and not for the overall transaction.
 --
+-- The 'getRecordsResNextShardIterator' is 'Nothing' only if the shard is
+-- closed. This instance will terminate the iteration as soon as an empty list
+-- of records is returned.
+--
 instance IteratedTransaction GetRecords GetRecordsResponse where
+    nextIteratedRequest GetRecords{..} (GetRecordsResponse _ []) = Nothing
     nextIteratedRequest GetRecords{..} GetRecordsResponse{..} =
         GetRecords getRecordsLimit <$> getRecordsResNextShardIterator
 
