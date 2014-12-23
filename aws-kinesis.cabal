@@ -3,7 +3,7 @@
 -- ------------------------------------------------------ --
 
 Name: aws-kinesis
-Version: 0.1.1
+Version: 0.1.2
 Synopsis: Bindings for Amazon Kinesis
 description:
     Bindings for <http://aws.amazon.com/kinesis/ Amazon Kinesis>
@@ -54,6 +54,7 @@ Library
         Aws.Kinesis.Commands.CreateStream
         Aws.Kinesis.Commands.DeleteStream
         Aws.Kinesis.Commands.PutRecord
+        Aws.Kinesis.Commands.PutRecords
         Aws.Kinesis.Commands.GetRecords
         Aws.Kinesis.Commands.GetShardIterator
         Aws.Kinesis.Commands.ListStreams

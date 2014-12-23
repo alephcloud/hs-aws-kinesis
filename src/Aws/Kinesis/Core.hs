@@ -102,6 +102,7 @@ data KinesisAction
     | KinesisListStreams
     | KinesisMergeShards
     | KinesisPutRecord
+    | KinesisPutRecords
     | KinesisSplitShard
     deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
 
@@ -114,6 +115,7 @@ kinesisActionToText KinesisGetShardIterator = "GetShardIterator"
 kinesisActionToText KinesisListStreams = "ListStreams"
 kinesisActionToText KinesisMergeShards = "MergeShards"
 kinesisActionToText KinesisPutRecord = "PutRecord"
+kinesisActionToText KinesisPutRecords = "PutRecords"
 kinesisActionToText KinesisSplitShard = "SplitShard"
 
 parseKinesisAction :: P.CharParsing m => m KinesisAction
@@ -126,6 +128,7 @@ parseKinesisAction =
     <|> KinesisListStreams <$ P.text "ListStreams"
     <|> KinesisMergeShards <$ P.text "MergeShards"
     <|> KinesisPutRecord <$ P.text "PutRecord"
+    <|> KinesisPutRecords <$ P.text "PutRecords"
     <|> KinesisSplitShard <$ P.text "SplitShard"
     <?> "KinesisAction"
 
