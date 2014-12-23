@@ -129,8 +129,7 @@ data PutRecordsResponseRecord = PutRecordsResponseRecord
     -- ^ The shard ID assigned to the (successfully processed) record.
     } deriving Show
 
-data PutRecordsResponse
-    = PutRecordsResponse
+data PutRecordsResponse = PutRecordsResponse
     { putRecordsResponseFailedRecordCount :: !Int
     -- ^ The number of unsuccessfully processed records in a 'PutRecords'
     -- request.
