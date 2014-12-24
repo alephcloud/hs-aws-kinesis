@@ -125,7 +125,3 @@ test-suite kinesis-tests
 
     ghc-options: -Wall -threaded
 
-
-
-
-
