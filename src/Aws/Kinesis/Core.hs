@@ -1,6 +1,6 @@
+{-# LANGUAGE CPP                #-}
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE OverloadedStrings  #-}
 
 -- |
 -- Module: Aws.Kinesis.Core
@@ -50,39 +50,39 @@ module Aws.Kinesis.Core
 , KinesisCommonError(..)
 ) where
 
-import Aws.Core
-import Aws.General
-import Aws.SignatureV4
+import           Aws.Core
+import           Aws.General
+import           Aws.SignatureV4
 
-import qualified Blaze.ByteString.Builder as BB
+import qualified Blaze.ByteString.Builder     as BB
 
-import Control.Applicative
-import Control.Exception
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Resource (throwM)
+import           Control.Applicative
+import           Control.Exception
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Resource (throwM)
 
-import Data.Aeson
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as LB
-import qualified Data.ByteString.Char8 as B8
-import Data.Conduit (($$+-))
-import Data.Conduit.Binary (sinkLbs)
-import Data.IORef
-import Data.Maybe
-import Data.Monoid
-import Data.String
-import Data.Time.Clock
-import Data.Typeable
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
+import           Data.Aeson
+import qualified Data.ByteString              as B
+import qualified Data.ByteString.Char8        as B8
+import qualified Data.ByteString.Lazy         as LB
+import           Data.Conduit                 (($$+-))
+import           Data.Conduit.Binary          (sinkLbs)
+import           Data.IORef
+import           Data.Maybe
+import           Data.Monoid
+import           Data.String
+import qualified Data.Text                    as T
+import qualified Data.Text.Encoding           as T
+import           Data.Time.Clock
+import           Data.Typeable
 
-import qualified Network.HTTP.Types as HTTP
-import qualified Network.HTTP.Conduit as HTTP
+import qualified Network.HTTP.Conduit         as HTTP
+import qualified Network.HTTP.Types           as HTTP
 
-import qualified Test.QuickCheck as Q
+import qualified Test.QuickCheck              as Q
 
-import qualified Text.Parser.Char as P
-import Text.Parser.Combinators ((<?>))
+import qualified Text.Parser.Char             as P
+import           Text.Parser.Combinators      ((<?>))
 
 data KinesisVersion
     = KinesisVersion_2013_12_02
@@ -162,7 +162,7 @@ kinesisServiceEndpoint r = error $ "Aws.Kinesis.Core.kinesisServiceEndpoint: uns
 -- Kinesis Metadata
 
 data KinesisMetadata = KinesisMetadata
-    { kinesisMAmzId2 :: Maybe T.Text
+    { kinesisMAmzId2    :: Maybe T.Text
     , kinesisMRequestId :: Maybe T.Text
     }
     deriving (Show)
@@ -189,7 +189,7 @@ data KinesisConfiguration qt = KinesisConfiguration
 
 data KinesisQuery = KinesisQuery
     { kinesisQueryAction :: !KinesisAction
-    , kinesisQueryBody :: !(Maybe B.ByteString)
+    , kinesisQueryBody   :: !(Maybe B.ByteString)
     }
     deriving (Show, Eq)
 
@@ -310,12 +310,12 @@ data KinesisError a
 --
 data KinesisErrorResponse
     = KinesisErrorResponse
-        { kinesisErrorCode :: !T.Text
+        { kinesisErrorCode    :: !T.Text
         , kinesisErrorMessage :: !T.Text
         }
     | KinesisResponseJsonError T.Text
     | KinesisOtherError
-        { kinesisOtherErrorStatus :: !HTTP.Status
+        { kinesisOtherErrorStatus  :: !HTTP.Status
         , kinesisOtherErrorMessage :: !T.Text
         }
     deriving (Show, Eq, Ord, Typeable)
@@ -457,10 +457,10 @@ data KinesisCommonError
 -- documentation and reference for the implementation of yet missing features./
 --
 data KinesisCommonParameters = KinesisCommonParameters
-    { kinesisAction :: !KinesisAction
+    { kinesisAction           :: !KinesisAction
     -- ^ The action to be performed.
 
-    , kinesisAuthParams :: !(Maybe ()) --
+    , kinesisAuthParams       :: !(Maybe ()) --
     -- ^ The parameters that are required to authenticate a Conditional request. Contains:
     --
     -- * AWSAccessKeyID
@@ -471,22 +471,22 @@ data KinesisCommonParameters = KinesisCommonParameters
     --
     -- * Signature
 
-    , kinesisAWSAccessKeyId :: !B8.ByteString
+    , kinesisAWSAccessKeyId   :: !B8.ByteString
     -- ^ The access key ID that corresponds to the secret access key that you used to sign the request.
 
-    , kinesisExpires :: !UTCTime
+    , kinesisExpires          :: !UTCTime
     -- ^ The date and time when the request signature expires.
     -- Precisely one of snsExpires or snsTimestamp must be present.
     --
     -- format: @YYYY-MM-DDThh:mm:ssZ@ (ISO 8601)
 
-    , kinesisTimestamp :: !UTCTime
+    , kinesisTimestamp        :: !UTCTime
     -- ^ The date and time of the request.
     -- Precisely one of snsExpires or snsTimestamp must be present.
     --
     -- format: @YYYY-MM-DDThh:mm:ssZ@ (ISO 8601)
 
-    , kinesisSecurityToken :: () -- !(Maybe SecurityToken)
+    , kinesisSecurityToken    :: () -- !(Maybe SecurityToken)
     -- ^ TODO
     --
     -- The temporary security token that was obtained through a call to AWS
@@ -494,12 +494,12 @@ data KinesisCommonParameters = KinesisCommonParameters
     -- Token Service, go to Using Temporary Security Credentials to Access AWS
     -- in Using Temporary Security Credentials.
 
-    , kinesisSignature :: !Signature
+    , kinesisSignature        :: !Signature
     -- ^ The digital signature that you created for the request. For
     -- information about generating a signature, go to the service's developer
     -- documentation.
 
-    , kinesisSignatureMethod :: !SignatureMethod
+    , kinesisSignatureMethod  :: !SignatureMethod
     -- ^ The hash algorithm that you used to create the request signature.
     --
     -- Valid Values: @HmacSHA256@ | @HmacSHA1@
@@ -507,7 +507,7 @@ data KinesisCommonParameters = KinesisCommonParameters
     , kinesisSignatureVersion :: !SignatureVersion
     -- ^ The signature version you use to sign the request. Set this to the value that is recommended for your service.
 
-    , kinesisVersion :: KinesisVersion
+    , kinesisVersion          :: KinesisVersion
     -- ^ The API version that the request is written for.
     }
 
