@@ -1,6 +1,20 @@
--- ------------------------------------------------------ --
--- Copyright © 2014 AlephCloud Systems, Inc.
--- ------------------------------------------------------ --
+-- Copyright (c) 2013-2014 PivotCloud, Inc.
+--
+-- aws-kinesis.cabal
+--
+-- Please feel free to contact us at licensing@pivotmail.com with any
+-- contributions, additions, or other feedback; we would love to hear from
+-- you.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License"); you may
+-- not use this file except in compliance with the License. You may obtain a
+-- copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-- License for the specific language governing permissions and limitations
+-- under the License.
 
 Name: aws-kinesis
 Version: 0.1.2
@@ -17,11 +31,11 @@ description:
 
 Homepage: https://github.com/alephcloud/hs-aws-kinesis
 Bug-reports: https://github.com/alephcloud/hs-aws-kinesis/issues
-License: MIT
+License: Apache-2.0
 License-file: LICENSE
-Author: Lars Kuhtz <lars@alephcloud.com>
-Maintainer: Lars Kuhtz <lars@alephcloud.com>
-Copyright: Copyright (c) 2014 AlephCloud, Inc.
+Author: Lars Kuhtz <lkuhtz@pivotmail.com>
+Maintainer: Lars Kuhtz <lkuhtz@pivotmail.com>
+Copyright: Copyright (c) 2013-2014 PivotCloud, Inc.
 Category: Network, Web, AWS, Cloud, Distributed Computing
 Build-type: Simple
 
