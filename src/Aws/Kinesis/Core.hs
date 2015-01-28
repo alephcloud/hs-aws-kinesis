@@ -309,9 +309,7 @@ errorResponseConsumer resp = do
   where
     kinesisError doc = case eitherDecode doc of
         Left e -> throwM . KinesisResponseJsonError $ T.pack e
-        Right a -> do
-            liftIO $ print doc
-            throwM (a :: KinesisErrorResponse)
+        Right a -> throwM (a :: KinesisErrorResponse)
 
 -- -------------------------------------------------------------------------- --
 -- Kinesis Errors
@@ -345,7 +343,7 @@ instance Exception KinesisErrorResponse
 instance FromJSON KinesisErrorResponse where
     parseJSON = withObject "KinesisErrorResponse" $ \o -> KinesisErrorResponse
         <$> o .: "__type"
-        <*> o .:? "message" .!= ""
+        <*> (o .: "message" <|> o .: "Message" <|> pure "")
 
 -- | Common Kinesis Errors
 --
