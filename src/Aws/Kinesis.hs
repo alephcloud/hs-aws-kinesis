@@ -60,6 +60,7 @@ module Aws.Kinesis
 , module Aws.Kinesis.Commands.ListStreams
 , module Aws.Kinesis.Commands.MergeShards
 , module Aws.Kinesis.Commands.PutRecord
+, module Aws.Kinesis.Commands.PutRecords
 , module Aws.Kinesis.Commands.SplitShard
 ) where
 
@@ -73,4 +74,5 @@ import Aws.Kinesis.Commands.GetShardIterator
 import Aws.Kinesis.Commands.ListStreams
 import Aws.Kinesis.Commands.MergeShards
 import Aws.Kinesis.Commands.PutRecord
+import Aws.Kinesis.Commands.PutRecords
 import Aws.Kinesis.Commands.SplitShard
