@@ -1,3 +1,15 @@
+0.1.3
+=====
+
+*   Fix [bug #9](https://github.com/alephcloud/hs-aws-kinesis/issues/9);
+    accept both `Message` and `message` in JSON error responses
+    from AWS.
+
+*   Solve [issue #11](https://github.com/alephcloud/hs-aws-kinesis/issues/11);
+    export PutRecords from Aws.Kinesis
+
+*   Raise lower bound on aws-general to 0.2.
+
 0.1.2
 =====
 
