@@ -17,7 +17,7 @@
 -- under the License.
 
 Name: aws-kinesis
-Version: 0.1.3
+Version: 0.1.4
 Synopsis: Bindings for Amazon Kinesis
 description:
     Bindings for <http://aws.amazon.com/kinesis/ Amazon Kinesis>
