@@ -4,6 +4,8 @@
 *   Solve [issue #15](https://github.com/alephcloud/hs-aws-kinesis/issues/15),
     adding support for custom endpoints.
 
+*   Add support for specifying a protocol to `KinesisConfiguration`.
+
 *   Raise lower bound on aws-general to 0.2.1.
 
 0.1.3

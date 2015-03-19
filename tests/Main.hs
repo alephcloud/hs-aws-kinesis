@@ -107,7 +107,7 @@ tests = testGroup "Kinesis Tests"
 -- Kinesis Utils
 
 kinesisConfiguration :: KinesisConfiguration qt
-kinesisConfiguration = KinesisConfiguration testRegion
+kinesisConfiguration = defaultKinesisConfiguration testRegion
 
 simpleKinesis
     :: (AsMemoryResponse a, Transaction r a, ServiceConfiguration r ~ KinesisConfiguration, MonadIO m)

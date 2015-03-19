@@ -37,6 +37,7 @@ module Aws.Kinesis.Core
 
 -- * Kinesis Client Configuration
 , KinesisConfiguration(..)
+, defaultKinesisConfiguration
 
 -- * Kinesis Client Metadata
 , KinesisMetadata(..)
@@ -200,8 +201,17 @@ instance Monoid KinesisMetadata where
 
 data KinesisConfiguration qt = KinesisConfiguration
     { kinesisConfRegion :: Region
+    , kinesisConfProtocol :: Protocol
     }
     deriving (Show)
+
+defaultKinesisConfiguration
+    :: Region
+    -> KinesisConfiguration qt
+defaultKinesisConfiguration r = KinesisConfiguration
+    { kinesisConfRegion = r
+    , kinesisConfProtocol = HTTPS
+    }
 
 -- -------------------------------------------------------------------------- --
 -- Kinesis Query
@@ -220,7 +230,7 @@ data KinesisQuery = KinesisQuery
 kinesisSignQuery :: KinesisQuery -> KinesisConfiguration qt -> SignatureData -> SignedQuery
 kinesisSignQuery query conf sigData = SignedQuery
     { sqMethod = Post
-    , sqProtocol = HTTPS
+    , sqProtocol = kinesisConfProtocol conf
     , sqHost = host
     , sqPort = port
     , sqPath = BB.toByteString $ HTTP.encodePathSegments path
