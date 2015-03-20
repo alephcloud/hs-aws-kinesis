@@ -37,6 +37,7 @@ module Aws.Kinesis.Core
 
 -- * Kinesis Client Configuration
 , KinesisConfiguration(..)
+, defaultKinesisConfiguration
 
 -- * Kinesis Client Metadata
 , KinesisMetadata(..)
@@ -174,6 +175,7 @@ kinesisServiceEndpoint ApSoutheast2 = "kinesis.ap-southeast-2.amazonaws.com"
 kinesisServiceEndpoint EuWest1 = "kinesis.eu-west-1.amazonaws.com"
 kinesisServiceEndpoint UsEast1 = "kinesis.us-east-1.amazonaws.com"
 kinesisServiceEndpoint UsWest2 = "kinesis.us-west-2.amazonaws.com"
+kinesisServiceEndpoint (CustomEndpoint e _) = T.encodeUtf8 e
 kinesisServiceEndpoint r = error $ "Aws.Kinesis.Core.kinesisServiceEndpoint: unsupported region " <> show r -- FIXME
 
 -- -------------------------------------------------------------------------- --
@@ -199,8 +201,17 @@ instance Monoid KinesisMetadata where
 
 data KinesisConfiguration qt = KinesisConfiguration
     { kinesisConfRegion :: Region
+    , kinesisConfProtocol :: Protocol
     }
     deriving (Show)
+
+defaultKinesisConfiguration
+    :: Region
+    -> KinesisConfiguration qt
+defaultKinesisConfiguration r = KinesisConfiguration
+    { kinesisConfRegion = r
+    , kinesisConfProtocol = HTTPS
+    }
 
 -- -------------------------------------------------------------------------- --
 -- Kinesis Query
@@ -219,7 +230,7 @@ data KinesisQuery = KinesisQuery
 kinesisSignQuery :: KinesisQuery -> KinesisConfiguration qt -> SignatureData -> SignedQuery
 kinesisSignQuery query conf sigData = SignedQuery
     { sqMethod = Post
-    , sqProtocol = HTTPS
+    , sqProtocol = kinesisConfProtocol conf
     , sqHost = host
     , sqPort = port
     , sqPath = BB.toByteString $ HTTP.encodePathSegments path
@@ -238,7 +249,9 @@ kinesisSignQuery query conf sigData = SignedQuery
     reqQuery = []
     host = kinesisServiceEndpoint $ kinesisConfRegion conf
     headers = [("host", host), kinesisTargetHeader (kinesisQueryAction query)]
-    port = 443
+    port = case kinesisConfRegion conf of
+               CustomEndpoint _ p -> p
+               _ -> 443
     contentType = Just "application/x-amz-json-1.1"
     body = kinesisQueryBody query
 
