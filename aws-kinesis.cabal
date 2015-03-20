@@ -1,4 +1,4 @@
--- Copyright (c) 2013-2014 PivotCloud, Inc.
+-- Copyright (c) 2013-2015 PivotCloud, Inc.
 --
 -- aws-kinesis.cabal
 --
@@ -35,7 +35,7 @@ License: Apache-2.0
 License-file: LICENSE
 Author: Lars Kuhtz <lkuhtz@pivotmail.com>
 Maintainer: Lars Kuhtz <lkuhtz@pivotmail.com>
-Copyright: Copyright (c) 2013-2014 PivotCloud, Inc.
+Copyright: Copyright (c) 2013-2015 PivotCloud, Inc.
 Category: Network, Web, AWS, Cloud, Distributed Computing
 Build-type: Simple
 

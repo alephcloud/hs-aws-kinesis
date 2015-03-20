@@ -1,4 +1,4 @@
--- Copyright (c) 2013-2014 PivotCloud, Inc.
+-- Copyright (c) 2013-2015 PivotCloud, Inc.
 --
 -- Aws.Kinesis.Commands.MergeShards
 --
@@ -18,7 +18,7 @@
 
 -- |
 -- Module: Aws.Kinesis.Commands.MergeShards
--- Copyright: Copyright (c) 2013-2014 PivotCloud, Inc.
+-- Copyright: Copyright (c) 2013-2015 PivotCloud, Inc.
 -- license: Apache License, Version 2.0
 -- Maintainer: Lars Kuhtz <lars@alephcloud.com>
 -- Stability: experimental
