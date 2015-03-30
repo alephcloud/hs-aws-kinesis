@@ -47,6 +47,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_ListStreams.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -61,11 +62,17 @@ module Aws.Kinesis.Commands.ListStreams
 , ListStreamsExceptions(..)
 ) where
 
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
+
 import Aws.Core
 import Aws.Kinesis.Types
 import Aws.Kinesis.Core
 
+#if ! MIN_VERSION_base(4,8,0)
 import Control.Applicative
+#endif
 import Control.DeepSeq
 
 import Data.Aeson

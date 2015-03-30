@@ -30,6 +30,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_Types.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -60,9 +61,15 @@ module Aws.Kinesis.Types
 , Shard(..)
 ) where
 
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
+
 import Aws.General
 
+#if ! MIN_VERSION_base(4,8,0)
 import Control.Applicative
+#endif
 import Control.DeepSeq
 
 import Data.Aeson

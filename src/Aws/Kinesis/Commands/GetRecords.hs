@@ -61,6 +61,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_GetRecords.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -75,11 +76,17 @@ module Aws.Kinesis.Commands.GetRecords
 , GetRecordsExceptions(..)
 ) where
 
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
+
 import Aws.Core
 import Aws.Kinesis.Core
 import Aws.Kinesis.Types
 
+#if ! MIN_VERSION_base(4,8,0)
 import Control.Applicative
+#endif
 import Control.DeepSeq
 
 import Data.Aeson
