@@ -74,6 +74,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_SplitShard.html>
 
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -91,9 +92,13 @@ import Aws.Core
 import Aws.Kinesis.Core
 import Aws.Kinesis.Types
 
+import Control.DeepSeq
+
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LB
 import Data.Typeable
+
+import GHC.Generics
 
 splitShardAction :: KinesisAction
 splitShardAction = KinesisSplitShard
@@ -115,7 +120,9 @@ data SplitShard = SplitShard
     , splitShardStreamName :: !StreamName
     -- ^ The name of the stream for the shard split.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData SplitShard
 
 instance ToJSON SplitShard where
     toJSON SplitShard{..} = object
@@ -125,7 +132,9 @@ instance ToJSON SplitShard where
         ]
 
 data SplitShardResponse = SplitShardResponse
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData SplitShardResponse
 
 instance ResponseConsumer r SplitShardResponse where
     type ResponseMetadata SplitShardResponse = KinesisMetadata
@@ -166,5 +175,7 @@ data SplitShardExceptions
     | SplitShardResourceNotFoundException
     -- ^ /Code 400/
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData SplitShardExceptions
 

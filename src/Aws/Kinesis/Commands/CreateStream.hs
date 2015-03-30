@@ -66,6 +66,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_CreateStream.html>
 
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -83,9 +84,13 @@ import Aws.Core
 import Aws.Kinesis.Core
 import Aws.Kinesis.Types
 
+import Control.DeepSeq
+
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LB
 import Data.Typeable
+
+import GHC.Generics
 
 createStreamAction :: KinesisAction
 createStreamAction = KinesisCreateStream
@@ -105,7 +110,9 @@ data CreateStream = CreateStream
     , createStreamStreamName :: !StreamName
     -- ^ A name to identify the stream.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData CreateStream
 
 instance ToJSON CreateStream where
     toJSON CreateStream{..} = object
@@ -114,7 +121,9 @@ instance ToJSON CreateStream where
         ]
 
 data CreateStreamResponse = CreateStreamResponse
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData CreateStreamResponse
 
 instance ResponseConsumer r CreateStreamResponse where
     type ResponseMetadata CreateStreamResponse = KinesisMetadata
@@ -152,5 +161,7 @@ data CreateStreamExceptions
     | CreateStreamResourceInUseException
     -- ^ /Code 400/
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData CreateStreamExceptions
 

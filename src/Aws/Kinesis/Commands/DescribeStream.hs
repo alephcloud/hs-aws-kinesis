@@ -50,6 +50,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_DescribeStream.html>
 
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -63,16 +64,19 @@ module Aws.Kinesis.Commands.DescribeStream
 , DescribeStreamExceptions(..)
 ) where
 
-import Control.Applicative
-
 import Aws.Core
 import Aws.Kinesis.Core
 import Aws.Kinesis.Types
+
+import Control.Applicative
+import Control.DeepSeq
 
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LB
 import Data.Maybe
 import Data.Typeable
+
+import GHC.Generics
 
 describeStreamAction :: KinesisAction
 describeStreamAction = KinesisDescribeStream
@@ -87,7 +91,9 @@ data DescribeStream = DescribeStream
     , describeStreamStreamName :: !StreamName
     -- ^ The name of the stream to describe.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData DescribeStream
 
 instance ToJSON DescribeStream where
     toJSON DescribeStream{..} = object
@@ -102,7 +108,9 @@ data DescribeStreamResponse = DescribeStreamResponse
     -- shard objects that comprise the stream, and states whether there are
     -- more shards available.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData DescribeStreamResponse
 
 instance ResponseConsumer r DescribeStreamResponse where
     type ResponseMetadata DescribeStreamResponse = KinesisMetadata
@@ -167,6 +175,7 @@ data DescribeStreamExceptions
     | DescribeStreamResourceNotFoundException
     -- ^ /Code 400/
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
 
+instance NFData DescribeStreamExceptions
 
