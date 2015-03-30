@@ -30,6 +30,8 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_Types.html>
 
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -59,9 +61,16 @@ module Aws.Kinesis.Types
 , Shard(..)
 ) where
 
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
+
 import Aws.General
 
+#if ! MIN_VERSION_base(4,8,0)
 import Control.Applicative
+#endif
+import Control.DeepSeq
 
 import Data.Aeson
 import qualified Data.ByteString as B
@@ -72,6 +81,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.Read as T
 import Data.Typeable
+
+import GHC.Generics
 
 import Test.QuickCheck
 import Test.QuickCheck.Instances ()
@@ -101,7 +112,9 @@ tryM = either (fail . T.unpack) return
 -- > [a-zA-Z0-9_.-]+
 --
 newtype StreamName = StreamName { streamNameText :: T.Text }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData StreamName
 
 -- | Smart Constructor for 'StreamName' that enforces size constraints.
 --
@@ -137,7 +150,9 @@ instance Arbitrary StreamName where
 -- Length constraints: Minimum length of 1. Maximum length of 128.
 --
 newtype ShardId = ShardId { shardIdText :: T.Text }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData ShardId
 
 instance ToJSON ShardId where
     toJSON = toJSON . shardIdText
@@ -152,7 +167,9 @@ instance Arbitrary ShardId where
 -- | Opaque sequence number as returned by PutRecord.
 --
 newtype SequenceNumber = SequenceNumber { sequenceNumberText :: T.Text }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData SequenceNumber
 
 instance ToJSON SequenceNumber where
     toJSON = toJSON . sequenceNumberText
@@ -179,7 +196,9 @@ instance Arbitrary SequenceNumber where
 -- seems to indicate that the value is actually unsigned.
 --
 newtype PartitionHash = PartitionHash { partitionHashInteger :: Integer {- FIXME -} }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData PartitionHash
 
 -- | Smart Constructor for 'PartitionHash' that enforces size constraints.
 --
@@ -217,7 +236,9 @@ instance Arbitrary PartitionHash where
 -- Length constraints: Minimum length of 1. Maximum length of 256.
 --
 newtype PartitionKey = PartitionKey { partitionKeyText :: T.Text }
-    deriving (Show, Read, Eq, Ord, IsString, Typeable)
+    deriving (Show, Read, Eq, Ord, IsString, Typeable, Generic)
+
+instance NFData PartitionKey
 
 partitionKey :: T.Text -> Either T.Text PartitionKey
 partitionKey t
@@ -241,7 +262,9 @@ instance Arbitrary PartitionKey where
 -- Length constraints: Minimum length of 1. Maximum length of 512.
 --
 newtype ShardIterator = ShardIterator { shardIteratorText :: T.Text }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData ShardIterator
 
 shardIterator :: T.Text -> Either T.Text ShardIterator
 shardIterator t
@@ -282,7 +305,9 @@ data ShardIteratorType
     -- ^ Start reading just after the most recent record in the shard, so that
     -- you always read the most recent data in the shard.
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData ShardIteratorType
 
 instance ToJSON ShardIteratorType where
     toJSON AtSequenceNumber = "AT_SEQUENCE_NUMBER"
@@ -326,7 +351,9 @@ data Record = Record
     , recordSequenceNumber :: !SequenceNumber
     -- ^ The unique identifier for the record in the Amazon Kinesis stream.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData Record
 
 instance ToJSON Record where
     toJSON Record{..} = object
@@ -375,7 +402,9 @@ data StreamDescription = StreamDescription
     , streamDescriptionStreamStatus :: !StreamStatus
     -- ^ The current status of the stream being described.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData StreamDescription
 
 instance ToJSON StreamDescription where
     toJSON StreamDescription{..} = object
@@ -425,7 +454,9 @@ data StreamStatus
     -- ^ Shards in the stream are being merged or split. Read and write
     -- operations continue to work while the stream is in the UPDATING state.
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData StreamStatus
 
 instance ToJSON StreamStatus where
     toJSON StreamStatusCreating = "CREATING"
@@ -471,7 +502,9 @@ data Shard = Shard
     , shardShardId :: ShardId
     -- ^ The unique identifier of the shard within the Amazon Kinesis stream.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData Shard
 
 instance ToJSON Shard where
     toJSON Shard{..} = object

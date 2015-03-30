@@ -47,6 +47,8 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_ListStreams.html>
 
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -60,16 +62,25 @@ module Aws.Kinesis.Commands.ListStreams
 , ListStreamsExceptions(..)
 ) where
 
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
+
 import Aws.Core
 import Aws.Kinesis.Types
 import Aws.Kinesis.Core
 
+#if ! MIN_VERSION_base(4,8,0)
 import Control.Applicative
+#endif
+import Control.DeepSeq
 
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LB
 import Data.Maybe
 import Data.Typeable
+
+import GHC.Generics
 
 listStreamsAction :: KinesisAction
 listStreamsAction = KinesisListStreams
@@ -81,7 +92,9 @@ data ListStreams = ListStreams
     , listStreamsLimit :: !(Maybe Int)
     -- ^ The maximum number of streams to list.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData ListStreams
 
 instance ToJSON ListStreams where
     toJSON ListStreams{..} = object
@@ -97,7 +110,9 @@ data ListStreamsResponse = ListStreamsResponse
     -- ^ The names of the streams that are associated with the AWS account
     -- making the ListStreams request.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData ListStreamsResponse
 
 instance FromJSON ListStreamsResponse where
     parseJSON = withObject "ListStreamsResponse" $ \o -> ListStreamsResponse
@@ -158,5 +173,7 @@ data ListStreamsExceptions
     = ListStreamsLimitExceededException
     -- ^ /Code 400/
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData ListStreamsExceptions
 

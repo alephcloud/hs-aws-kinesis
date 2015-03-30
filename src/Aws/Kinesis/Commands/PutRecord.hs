@@ -62,6 +62,8 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_PutRecord.html>
 
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -75,11 +77,18 @@ module Aws.Kinesis.Commands.PutRecord
 , PutRecordExceptions(..)
 ) where
 
+#ifndef MIN_VERSION_base
+#define MIN_VERSION_base(x,y,z) 1
+#endif
+
 import Aws.Core
 import Aws.Kinesis.Types
 import Aws.Kinesis.Core
 
+#if ! MIN_VERSION_base(4,8,0)
 import Control.Applicative
+#endif
+import Control.DeepSeq
 
 import Data.Aeson
 import Data.ByteString as B
@@ -87,6 +96,8 @@ import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.Text.Encoding as T
 import Data.Typeable
+
+import GHC.Generics
 
 putRecordAction :: KinesisAction
 putRecordAction = KinesisPutRecord
@@ -121,7 +132,9 @@ data PutRecord = PutRecord
     , putRecordStreamName :: !StreamName
     -- ^ The name of the stream to put the data record into.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData PutRecord
 
 instance ToJSON PutRecord where
     toJSON PutRecord{..} = object
@@ -142,7 +155,9 @@ data PutRecordResponse = PutRecordResponse
     , putRecordResShardId :: !ShardId
     -- ^ The shard ID of the shard where the data record was placed.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData PutRecordResponse
 
 instance FromJSON PutRecordResponse where
     parseJSON = withObject "PutRecordResponse" $ \o -> PutRecordResponse
@@ -182,5 +197,7 @@ data PutRecordExceptions
     | PutRecordResourceNotFoundException
     -- ^ /Code 400/
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData PutRecordExceptions
 

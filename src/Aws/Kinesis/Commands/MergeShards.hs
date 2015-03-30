@@ -66,6 +66,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_MergeShards.html>
 
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -83,9 +84,13 @@ import Aws.Core
 import Aws.Kinesis.Core
 import Aws.Kinesis.Types
 
+import Control.DeepSeq
+
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LB
 import Data.Typeable
+
+import GHC.Generics
 
 mergeShardsAction :: KinesisAction
 mergeShardsAction = KinesisMergeShards
@@ -101,7 +106,9 @@ data MergeShards = MergeShards
     , mergeShardsStreamName :: !StreamName
     -- ^ The name of the stream for the merge.
     }
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData MergeShards
 
 instance ToJSON MergeShards where
     toJSON MergeShards{..} = object
@@ -111,7 +118,9 @@ instance ToJSON MergeShards where
         ]
 
 data MergeShardsResponse = MergeShardsResponse
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData MergeShardsResponse
 
 instance ResponseConsumer r MergeShardsResponse where
     type ResponseMetadata MergeShardsResponse = KinesisMetadata
@@ -152,7 +161,7 @@ data MergeShardsExceptions
     | MergeShardsResourceNotFoundException
     -- ^ /Code 400/
 
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
 
-
+instance NFData MergeShardsExceptions
 

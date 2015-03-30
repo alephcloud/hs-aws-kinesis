@@ -27,6 +27,8 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference>
 
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE CPP #-}
@@ -76,6 +78,7 @@ import Aws.SignatureV4
 import qualified Blaze.ByteString.Builder as BB
 
 import Control.Applicative
+import Control.DeepSeq
 import Control.Exception
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Resource (throwM)
@@ -95,6 +98,8 @@ import Data.Typeable
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 
+import GHC.Generics
+
 import qualified Network.HTTP.Types as HTTP
 import qualified Network.HTTP.Conduit as HTTP
 
@@ -103,8 +108,20 @@ import qualified Test.QuickCheck as Q
 import qualified Text.Parser.Char as P
 import Text.Parser.Combinators ((<?>))
 
+-- -------------------------------------------------------------------------- --
+-- Orphans
+
+deriving instance Generic HTTP.Status
+instance NFData HTTP.Status
+
+-- -------------------------------------------------------------------------- --
+-- Kinesis Version
+
 data KinesisVersion
     = KinesisVersion_2013_12_02
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData KinesisVersion
 
 kinesisTargetVersion :: IsString a => a
 kinesisTargetVersion = "Kinesis_20131202"
@@ -123,7 +140,9 @@ data KinesisAction
     | KinesisPutRecord
     | KinesisPutRecords
     | KinesisSplitShard
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData KinesisAction
 
 kinesisActionToText :: IsString a => KinesisAction -> a
 kinesisActionToText KinesisCreateStream = "CreateStream"
@@ -185,7 +204,9 @@ data KinesisMetadata = KinesisMetadata
     { kinesisMAmzId2 :: Maybe T.Text
     , kinesisMRequestId :: Maybe T.Text
     }
-    deriving (Show)
+    deriving (Show, Generic)
+
+instance NFData KinesisMetadata
 
 instance Loggable KinesisMetadata where
     toLogText (KinesisMetadata rid id2) =
@@ -203,7 +224,7 @@ data KinesisConfiguration qt = KinesisConfiguration
     { kinesisConfRegion :: Region
     , kinesisConfProtocol :: Protocol
     }
-    deriving (Show)
+    deriving (Show, Typeable)
 
 defaultKinesisConfiguration
     :: Region
@@ -220,7 +241,9 @@ data KinesisQuery = KinesisQuery
     { kinesisQueryAction :: !KinesisAction
     , kinesisQueryBody :: !(Maybe B.ByteString)
     }
-    deriving (Show, Eq)
+    deriving (Show, Eq, Typeable, Generic)
+
+instance NFData KinesisQuery
 
 -- | Creates a signed query.
 --
@@ -332,7 +355,9 @@ errorResponseConsumer resp = do
 data KinesisError a
     = KinesisErrorCommon KinesisCommonError
     | KinesisErrorCommand a
-    deriving (Show, Read, Eq, Ord, Typeable)
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData a => NFData (KinesisError a)
 
 -- | All Kinesis exceptions have HTTP status code 400 and include
 -- a JSON body with an exception type property and a short message.
@@ -347,9 +372,10 @@ data KinesisErrorResponse
         { kinesisOtherErrorStatus :: !HTTP.Status
         , kinesisOtherErrorMessage :: !T.Text
         }
-    deriving (Show, Eq, Ord, Typeable)
+    deriving (Show, Eq, Ord, Typeable, Generic)
 
 instance Exception KinesisErrorResponse
+instance NFData KinesisErrorResponse
 
 -- | This instance captures only the 'KinesisErrorResponse' constructor
 --
@@ -469,7 +495,9 @@ data KinesisCommonError
     -- /Code 400/
     --
     | ErrorValidationError
-    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+    deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable, Generic)
+
+instance NFData KinesisCommonError
 
 -- -------------------------------------------------------------------------- --
 -- Common Parameters
@@ -539,4 +567,7 @@ data KinesisCommonParameters = KinesisCommonParameters
     , kinesisVersion :: KinesisVersion
     -- ^ The API version that the request is written for.
     }
+    deriving (Show, Eq, Read, Ord, Typeable, Generic)
+
+instance NFData KinesisCommonParameters
 

@@ -81,6 +81,8 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecords.html>
 
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -97,12 +99,18 @@ module Aws.Kinesis.Commands.PutRecords
 import Aws.Core
 import Aws.Kinesis.Core
 import Aws.Kinesis.Types
+
+import Control.DeepSeq
+
 import Data.Aeson
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import Data.Typeable
+
+import GHC.Generics
 
 -- | Represents a single record in a 'PutRecords' request.
 --
@@ -118,7 +126,10 @@ data PutRecordsRequestEntry = PutRecordsRequestEntry
     , putRecordsRequestEntryPartitionKey :: !PartitionKey
     -- ^ Determines which shard in the stream the data record is assigned to.
     -- All data records with the same partition key map to the same shard.
-    } deriving Show
+    }
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData PutRecordsRequestEntry
 
 -- | The body of the 'PutRecords' request.
 --
@@ -129,7 +140,10 @@ data PutRecords = PutRecords
 
     , putRecordsStreamName :: !StreamName
     -- ^ The stream name associated with the request.
-    } deriving Show
+    }
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData PutRecords
 
 -- | Represents the result for a single record in a 'PutRecordsResponse'.
 --
@@ -145,7 +159,10 @@ data PutRecordsResponseRecord = PutRecordsResponseRecord
 
     , putRecordsResponseRecordShardId :: !(Maybe ShardId)
     -- ^ The shard ID assigned to the (successfully processed) record.
-    } deriving Show
+    }
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData PutRecordsResponseRecord
 
 data PutRecordsResponse = PutRecordsResponse
     { putRecordsResponseFailedRecordCount :: !Int
@@ -155,7 +172,10 @@ data PutRecordsResponse = PutRecordsResponse
     , putRecordsResponseRecords :: ![PutRecordsResponseRecord]
     -- ^ An array of successfully and unsuccessfully processed records,
     -- correlated with the request by natural ordering.
-    } deriving Show
+    }
+    deriving (Show, Read, Eq, Ord, Typeable, Generic)
+
+instance NFData PutRecordsResponse
 
 instance ToJSON PutRecordsRequestEntry where
     toJSON PutRecordsRequestEntry{..} = object $
