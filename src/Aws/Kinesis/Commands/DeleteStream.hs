@@ -47,6 +47,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_DeleteStream.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -99,7 +100,11 @@ instance FromJSON DeleteStreamResponse where
 
 instance ResponseConsumer r DeleteStreamResponse where
     type ResponseMetadata DeleteStreamResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance SignQuery DeleteStream where
     type ServiceConfiguration DeleteStream = KinesisConfiguration

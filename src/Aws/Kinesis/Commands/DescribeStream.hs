@@ -121,7 +121,11 @@ instance NFData DescribeStreamResponse
 
 instance ResponseConsumer r DescribeStreamResponse where
     type ResponseMetadata DescribeStreamResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance FromJSON DescribeStreamResponse where
     parseJSON = withObject "DescribeStreamResponse" $ \o -> DescribeStreamResponse

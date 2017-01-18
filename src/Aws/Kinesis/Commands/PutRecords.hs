@@ -81,6 +81,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecords.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -208,7 +209,11 @@ instance Transaction PutRecords PutRecordsResponse where
 
 instance ResponseConsumer r PutRecordsResponse where
     type ResponseMetadata PutRecordsResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance AsMemoryResponse PutRecordsResponse where
     type MemoryResponse PutRecordsResponse = PutRecordsResponse

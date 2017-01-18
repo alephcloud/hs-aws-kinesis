@@ -149,7 +149,11 @@ instance FromJSON GetShardIteratorResponse where
 
 instance ResponseConsumer r GetShardIteratorResponse where
     type ResponseMetadata GetShardIteratorResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance SignQuery GetShardIterator where
     type ServiceConfiguration GetShardIterator = KinesisConfiguration

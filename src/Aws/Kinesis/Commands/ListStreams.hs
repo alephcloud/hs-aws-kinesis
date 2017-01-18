@@ -121,7 +121,11 @@ instance FromJSON ListStreamsResponse where
 
 instance ResponseConsumer r ListStreamsResponse where
     type ResponseMetadata ListStreamsResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance SignQuery ListStreams where
     type ServiceConfiguration ListStreams = KinesisConfiguration

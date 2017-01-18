@@ -74,6 +74,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_SplitShard.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -138,7 +139,11 @@ instance NFData SplitShardResponse
 
 instance ResponseConsumer r SplitShardResponse where
     type ResponseMetadata SplitShardResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance FromJSON SplitShardResponse where
     parseJSON _ = return SplitShardResponse
