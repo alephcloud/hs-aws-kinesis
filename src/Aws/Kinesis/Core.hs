@@ -87,11 +87,12 @@ import Data.Aeson
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.ByteString.Char8 as B8
-import Data.Conduit (($$+-))
+import Data.Conduit (runConduit, (.|))
 import Data.Conduit.Binary (sinkLbs)
 import Data.IORef
 import Data.Maybe
-import Data.Monoid
+import Data.Monoid as Monoid
+import Data.Semigroup as Semigroup
 import Data.String
 import Data.Time.Clock
 import Data.Typeable
@@ -213,9 +214,12 @@ instance Loggable KinesisMetadata where
         "Kinesis: request ID=" <> fromMaybe "<none>" rid
         <> ", x-amz-id-2=" <> fromMaybe "<none>" id2
 
-instance Monoid KinesisMetadata where
+instance Semigroup.Semigroup KinesisMetadata where
+    KinesisMetadata id1 r1 <> KinesisMetadata id2 r2 = KinesisMetadata (id1 <|> id2) (r1 <|> r2)
+
+instance Monoid.Monoid KinesisMetadata where
     mempty = KinesisMetadata Nothing Nothing
-    KinesisMetadata id1 r1 `mappend` KinesisMetadata id2 r2 = KinesisMetadata (id1 <|> id2) (r1 <|> r2)
+    mappend = (<>)
 
 -- -------------------------------------------------------------------------- --
 -- Kinesis Configuration
@@ -306,7 +310,7 @@ jsonResponseConsumer
     :: FromJSON a
     => HTTPResponseConsumer a
 jsonResponseConsumer res = do
-    doc <- HTTP.responseBody res $$+- sinkLbs
+    doc <- runConduit (HTTP.responseBody res .| sinkLbs)
     case eitherDecode (if doc == mempty then "{}" else doc) of
         Left err -> throwM . KinesisResponseJsonError $ T.pack err
         Right v -> return v
@@ -335,7 +339,7 @@ kinesisResponseConsumer metadata resp = do
 --
 errorResponseConsumer :: HTTPResponseConsumer a
 errorResponseConsumer resp = do
-    doc <- HTTP.responseBody resp $$+- sinkLbs
+    doc <- runConduit (HTTP.responseBody resp .| sinkLbs)
     if HTTP.responseStatus resp == HTTP.status400
         then kinesisError doc
         else throwM KinesisOtherError
