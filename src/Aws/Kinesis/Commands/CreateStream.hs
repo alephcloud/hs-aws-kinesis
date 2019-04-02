@@ -66,6 +66,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_CreateStream.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -127,7 +128,11 @@ instance NFData CreateStreamResponse
 
 instance ResponseConsumer r CreateStreamResponse where
     type ResponseMetadata CreateStreamResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance FromJSON CreateStreamResponse where
     parseJSON _ = return CreateStreamResponse

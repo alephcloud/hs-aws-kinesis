@@ -1,0 +1,6 @@
+resolver: lts-13.15
+packages:
+  - .
+extra-deps:
+  - aws-0.21.1
+  - aws-general-0.2.2

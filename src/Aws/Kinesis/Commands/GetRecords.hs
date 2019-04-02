@@ -137,7 +137,11 @@ instance FromJSON GetRecordsResponse where
 
 instance ResponseConsumer r GetRecordsResponse where
     type ResponseMetadata GetRecordsResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance SignQuery GetRecords where
     type ServiceConfiguration GetRecords = KinesisConfiguration

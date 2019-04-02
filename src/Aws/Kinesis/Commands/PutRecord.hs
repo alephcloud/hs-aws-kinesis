@@ -166,7 +166,11 @@ instance FromJSON PutRecordResponse where
 
 instance ResponseConsumer r PutRecordResponse where
     type ResponseMetadata PutRecordResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance SignQuery PutRecord where
     type ServiceConfiguration PutRecord = KinesisConfiguration

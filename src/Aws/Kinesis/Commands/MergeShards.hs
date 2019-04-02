@@ -66,6 +66,7 @@
 --
 -- <http://docs.aws.amazon.com/kinesis/2013-12-02/APIReference/API_MergeShards.html>
 
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -124,7 +125,11 @@ instance NFData MergeShardsResponse
 
 instance ResponseConsumer r MergeShardsResponse where
     type ResponseMetadata MergeShardsResponse = KinesisMetadata
+#if MIN_VERSION_aws(0,15,0)
+    responseConsumer _ _ = kinesisResponseConsumer
+#else
     responseConsumer _ = kinesisResponseConsumer
+#endif
 
 instance FromJSON MergeShardsResponse where
     parseJSON _ = return MergeShardsResponse

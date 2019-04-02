@@ -37,13 +37,12 @@ import Aws
 import Aws.Kinesis
 
 import Control.Error
-import Control.Exception
 import Control.Monad
 import Control.Monad.IO.Class
 
 import qualified Data.ByteString as B
 import qualified Data.List as L
-import Data.Monoid
+import Data.Monoid as Monoid
 import Data.Proxy
 import qualified Data.Text as T
 
@@ -120,24 +119,12 @@ simpleKinesis command = do
 simpleKinesisT
     :: (AsMemoryResponse a, Transaction r a, ServiceConfiguration r ~ KinesisConfiguration, MonadIO m)
     => r
-    -> EitherT T.Text m (MemoryResponse a)
+    -> ExceptT T.Text m (MemoryResponse a)
 simpleKinesisT = tryT . simpleKinesis
 
 testStreamName :: StreamName -> StreamName
 testStreamName = either (error . T.unpack) id
         . streamName . T.take 128 . testData . streamNameText
-
--- |
---
-withStream
-    :: StreamName -- ^ Stream Name
-    -> Int -- ^ Shard count
-    -> IO a
-    -> IO a
-withStream stream shardCount = bracket_ createStream deleteStream
-  where
-    createStream = simpleKinesis $ CreateStream shardCount stream
-    deleteStream = void $ simpleKinesis (DeleteStream stream)
 
 -- | The function 'withResource' from "Tasty" synchronizes the aquired
 -- resource through a 'TVar'. We don't need that for a stream. So instead
@@ -167,12 +154,12 @@ waitActiveT
     -- The actual maximal number of seconds is closest smaller
     -- power of two.
     -> StreamName
-    -> EitherT T.Text IO StreamDescription
+    -> ExceptT T.Text IO StreamDescription
 waitActiveT sec stream = retryT maxRetry $ do
     DescribeStreamResponse d <- simpleKinesisT
         $ DescribeStream Nothing Nothing stream
     unless (streamDescriptionStreamStatus d == StreamStatusActive)
-        $ left "Stream is not active"
+        $ throwE "Stream is not active"
     return d
   where
     maxRetry = floor $ logBase 2 (fromIntegral sec :: Double)
@@ -201,37 +188,37 @@ test_jsonRoundtrips = testGroup "JSON encoding roundtrips"
 test_stream1 :: TestTree
 test_stream1 = withStreamTest defaultStreamName 1 $ \stream ->
     testGroup "Perform a series of tests on a single stream"
-        [ eitherTOnceTest0 "list streams" (prop_streamList stream)
-        , eitherTOnceTest0 "describe stream" (prop_streamDescribe 1 stream)
-        , eitherTOnceTest2 "put and get stream" (prop_streamPutGet stream)
+        [ exceptTOnceTest0 "list streams" (prop_streamList stream)
+        , exceptTOnceTest0 "describe stream" (prop_streamDescribe 1 stream)
+        , exceptTOnceTest2 "put and get stream" (prop_streamPutGet stream)
         ]
 
-prop_streamList :: StreamName -> EitherT T.Text IO ()
+prop_streamList :: StreamName -> ExceptT T.Text IO ()
 prop_streamList stream = do
     ListStreamsResponse _ streams <- simpleKinesisT $ ListStreams Nothing Nothing
     unless (stream `elem` streams) $
-        left $ "stream " <> streamNameText stream <> " is not listed"
+        throwE $ "stream " Monoid.<> streamNameText stream <> " is not listed"
 
 prop_streamDescribe
     :: Int -- ^  expected number of shards
     -> StreamName
-    -> EitherT T.Text IO ()
+    -> ExceptT T.Text IO ()
 prop_streamDescribe shardNum stream = do
     desc <- waitActiveT 64 stream
 
     unless (streamDescriptionStreamName desc == stream)
-        . left $ "unexpected stream name in description: "
+        . throwE $ "unexpected stream name in description: "
         <> streamNameText (streamDescriptionStreamName desc)
 
     let l = length $ streamDescriptionShards desc
     unless (l == shardNum)
-        . left $ "unexpected number of shards in stream description: " <> sshow l
+        . throwE $ "unexpected number of shards in stream description: " <> sshow l
 
 prop_streamPutGet
     :: StreamName
     -> B.ByteString -- ^ Message data
     -> PartitionKey
-    -> EitherT T.Text IO ()
+    -> ExceptT T.Text IO ()
 prop_streamPutGet stream dat key = do
     desc <- waitActiveT 64 stream
 
@@ -246,7 +233,7 @@ prop_streamPutGet stream dat key = do
         }
 
     let shardIds = map shardShardId shards
-    unless (putShard `elem` shardIds) . left
+    unless (putShard `elem` shardIds) . throwE
         $ "unexpected shard id: expected on of " <> sshow shardIds <> "; got " <> sshow putShard
 
     record <- retryT 5 $ do
@@ -261,21 +248,21 @@ prop_streamPutGet stream dat key = do
             , getRecordsShardIterator = it
             }
         case records of
-            [] -> left "no record found in stream"
+            [] -> throwE "no record found in stream"
             [r] -> return r
-            t -> left $ "unexpected records found in stream: " <> sshow t
+            t -> throwE $ "unexpected records found in stream: " <> sshow t
 
     let getData = recordData record
-    unless (getData == dat) . left
+    unless (getData == dat) . throwE
         $ "data does not match: expected " <> sshow dat <> "; got " <> sshow getData
 
     let getSeqNr = recordSequenceNumber record
-    unless (getSeqNr == putSeqNr) . left
+    unless (getSeqNr == putSeqNr) . throwE
         $ "sequence numbers don't match: expected " <> sshow putSeqNr
         <> "; got " <> sshow getSeqNr
 
     let getPartKey = recordPartitionKey record
-    unless (getPartKey == key) . left
+    unless (getPartKey == key) . throwE
         $ "partition keys don't match: expected " <> sshow key
         <> "; got " <> sshow getPartKey
 
@@ -284,20 +271,20 @@ prop_streamPutGet stream dat key = do
 
 test_createStream :: TestTree
 test_createStream = testGroup "Stream creation"
-    [ eitherTOnceTest1 "create list delete" prop_createListDelete
+    [ exceptTOnceTest1 "create list delete" prop_createListDelete
     ]
 
 prop_createListDelete
     :: StreamName -- ^ stream name
-    -> EitherT T.Text IO ()
+    -> ExceptT T.Text IO ()
 prop_createListDelete stream = do
     CreateStreamResponse <- simpleKinesisT $ CreateStream 1 tstream
-    handleT (\e -> deleteStream >> left e) $ do
-        ListStreamsResponse _ allStreams <- simpleKinesisT
-            $ ListStreams Nothing Nothing
-        unless (tstream `elem` allStreams)
-            . left $ "stream " <> streamNameText tstream <> " not listed"
-        deleteStream
+    flip catchE (\e -> deleteStream >> throwE e) $ do
+       ListStreamsResponse _ allStreams <- simpleKinesisT
+           $ ListStreams Nothing Nothing
+       unless (tstream `elem` allStreams)
+           . throwE $ "stream " <> streamNameText tstream <> " not listed"
+       deleteStream
   where
     deleteStream = void $ simpleKinesisT (DeleteStream tstream)
     tstream = testStreamName stream

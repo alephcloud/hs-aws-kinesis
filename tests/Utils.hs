@@ -44,9 +44,9 @@ module Utils
 
 , evalTestT
 , evalTestTM
-, eitherTOnceTest0
-, eitherTOnceTest1
-, eitherTOnceTest2
+, exceptTOnceTest0
+, exceptTOnceTest1
+, exceptTOnceTest2
 
 -- * Generic Tests
 , test_jsonRoundtrip
@@ -62,7 +62,7 @@ import Control.Monad.Identity
 import Control.Monad.IO.Class
 
 import Data.Aeson (FromJSON, ToJSON, encode, eitherDecode)
-import Data.Monoid
+import Data.Monoid as Monoid
 import Data.Proxy
 import Data.String
 import qualified Data.Text as T
@@ -90,18 +90,18 @@ testDataPrefix = "__TEST_AWSHASKELLBINDINGS__"
 -- -------------------------------------------------------------------------- --
 -- General Utils
 
-tryT :: MonadIO m => IO a -> EitherT T.Text m a
+tryT :: MonadIO m => IO a -> ExceptT T.Text m a
 tryT = fmapLT (T.pack . show) . syncIO
 
 testData :: (IsString a, Monoid a) => a -> a
-testData a = testDataPrefix <> a
+testData a = testDataPrefix Monoid.<> a
 
-retryT :: MonadIO m => Int -> EitherT T.Text m a -> EitherT T.Text m a
+retryT :: MonadIO m => Int -> ExceptT T.Text m a -> ExceptT T.Text m a
 retryT i f = go 1
   where
     go x
         | x >= i = fmapLT (\e -> "error after " <> sshow x <> " retries: " <> e) f
-        | otherwise = f `catchT` \_ -> do
+        | otherwise = f `catchE` \_ -> do
             liftIO $ threadDelay (1000000 * min 60 (2^(x-1)))
             go (succ x)
 
@@ -111,41 +111,41 @@ sshow = fromString . show
 evalTestTM
     :: Functor f
     => String -- ^ test name
-    -> f (EitherT T.Text IO a) -- ^ test
+    -> f (ExceptT T.Text IO a) -- ^ test
     -> f (PropertyM IO Bool)
 evalTestTM name = fmap $
-    (liftIO . runEitherT) >=> \r -> case r of
+    (liftIO . runExceptT) >=> \r -> case r of
         Left e ->
             fail $ "failed to run test \"" <> name <> "\": " <> show e
         Right _ -> return True
 
 evalTestT
     :: String -- ^ test name
-    -> EitherT T.Text IO a -- ^ test
+    -> ExceptT T.Text IO a -- ^ test
     -> PropertyM IO Bool
 evalTestT name = runIdentity . evalTestTM name . Identity
 
-eitherTOnceTest0
+exceptTOnceTest0
     :: String -- ^ test name
-    -> EitherT T.Text IO a -- ^ test
+    -> ExceptT T.Text IO a -- ^ test
     -> TestTree
-eitherTOnceTest0 name test = testProperty name . once . monadicIO
+exceptTOnceTest0 name test = testProperty name . once . monadicIO
     $ evalTestT name test
 
-eitherTOnceTest1
+exceptTOnceTest1
     :: (Arbitrary a, Show a)
     => String -- ^ test name
-    -> (a -> EitherT T.Text IO b)
+    -> (a -> ExceptT T.Text IO b)
     -> TestTree
-eitherTOnceTest1 name test = testProperty name . once $ monadicIO
+exceptTOnceTest1 name test = testProperty name . once $ monadicIO
     . evalTestTM name test
 
-eitherTOnceTest2
+exceptTOnceTest2
     :: (Arbitrary a, Show a, Arbitrary b, Show b)
     => String -- ^ test name
-    -> (a -> b -> EitherT T.Text IO c)
+    -> (a -> b -> ExceptT T.Text IO c)
     -> TestTree
-eitherTOnceTest2 name test = testProperty name . once $ \a b -> monadicIO
+exceptTOnceTest2 name test = testProperty name . once $ \a b -> monadicIO
     $ (evalTestTM name $ uncurry test) (a, b)
 
 -- -------------------------------------------------------------------------- --
